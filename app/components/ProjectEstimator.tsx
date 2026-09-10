@@ -167,7 +167,7 @@ export default function ProjectEstimator() {
       }
 
       // 3. Preparation du lien WhatsApp
-      const myPhone = process.env.NEXT_PUBLIC_MY_WHATSAPP || '212600000000';
+      const myPhone = process.env.NEXT_PUBLIC_MY_WHATSAPP || '212660712635';
       const waMessage = encodeURIComponent(
         `Bonjour ! Je viens d'effectuer une estimation sur votre site :\n\n` +
         `👤 Nom: ${fullName}\n` +
