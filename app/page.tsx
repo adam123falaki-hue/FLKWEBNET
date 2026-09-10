@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ProjectEstimatorModal from '@/app/components/ProjectEstimatorModal';
+import ProjectEstimatorModal from './components/ProjectEstimatorModal';
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
