@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 import { 
   Layout, 
   Globe, 
@@ -36,18 +36,20 @@ interface FeatureOption {
   icon: React.ReactNode;
 }
 
-export default function ProjectEstimator() {
+interface ProjectEstimatorProps {
+  onClose?: () => void;
+}
+
+export default function ProjectEstimator({ onClose }: ProjectEstimatorProps) {
   const [step, setStep] = useState(1);
   const [selectedProject, setSelectedProject] = useState<ProjectOption | null>(null);
   const [selectedFeatures, setSelectedFeatures] = useState<FeatureOption[]>([]);
   
-  // Champs de contact (Obligatoires)
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
 
-  // Champs Optionnels
   const [company, setCompany] = useState('');
   const [budget, setBudget] = useState('');
   const [note, setNote] = useState('');
@@ -56,7 +58,6 @@ export default function ProjectEstimator() {
   const [submitted, setSubmitted] = useState(false);
   const [waLink, setWaLink] = useState('');
 
-  // 1. Types de projets
   const projectOptions: ProjectOption[] = [
     { 
       id: 'landing', 
@@ -95,7 +96,6 @@ export default function ProjectEstimator() {
     },
   ];
 
-  // 2. Options des fonctionnalités
   const featureOptions: FeatureOption[] = [
     { id: 'responsive', name: 'Design Responsive (Mobile, Tablette & Desktop)', price: 0, icon: <Smartphone className="w-4 h-4 text-[#22d3ee]" /> },
     { id: 'seo', name: 'Optimisation SEO & Vitesse de chargement', price: 600, icon: <Search className="w-4 h-4 text-[#22d3ee]" /> },
@@ -151,11 +151,9 @@ export default function ProjectEstimator() {
         note: note.trim(),
       };
 
-      // 1. Enregistrement Supabase
       const { error } = await supabase.from('flk_leads').insert([payload]);
       if (error) throw error;
 
-      // 2. Envoi Email via Resend Route
       try {
         await fetch('/api/send-lead', {
           method: 'POST',
@@ -166,8 +164,7 @@ export default function ProjectEstimator() {
         console.error("Erreur envoi email API:", e);
       }
 
-      // 3. Preparation du lien WhatsApp
-      const myPhone = process.env.NEXT_PUBLIC_MY_WHATSAPP || '212660712635';
+      const myPhone = process.env.NEXT_PUBLIC_MY_WHATSAPP || '212600000000';
       const waMessage = encodeURIComponent(
         `Bonjour ! Je viens d'effectuer une estimation sur votre site :\n\n` +
         `👤 Nom: ${fullName}\n` +
@@ -188,16 +185,17 @@ export default function ProjectEstimator() {
   };
 
   return (
-    <div className="w-full text-left" dir="ltr">
-      {/* Live Calculator & Progress Bar */}
+    <div className="w-full text-left relative" dir="ltr">
+      
+      {/* Header dyal Total Estimé */}
       {!submitted && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-800/80">
+        <div className="mb-6 pr-12">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <span className="text-[10px] font-mono tracking-wider uppercase bg-[#22d3ee]/10 text-[#22d3ee] px-2.5 py-1 rounded-md border border-[#22d3ee]/20 flex items-center gap-1.5">
               <Sparkles className="w-3 h-3" /> Devis Instantané
             </span>
 
-            <div className="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-xl border border-slate-800">
+            <div className="flex items-center gap-2 bg-slate-950/80 px-3.5 py-1.5 rounded-xl border border-slate-800 shadow-md">
               <Calculator className="w-4 h-4 text-[#22d3ee]" />
               <span className="text-xs text-slate-400 font-medium">Total Estimé:</span>
               <span className="text-sm font-black text-[#22d3ee]">
@@ -211,7 +209,7 @@ export default function ProjectEstimator() {
             <span className={step >= 2 ? "text-[#22d3ee] font-bold" : ""}>2. Options</span>
             <span className={step >= 3 ? "text-[#22d3ee] font-bold" : ""}>3. Contact</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800/60">
             <div 
               className="h-full bg-gradient-to-r from-[#22d3ee] to-[#00838F] transition-all duration-300 ease-out"
               style={{ width: `${(step / 3) * 100}%` }}
@@ -238,7 +236,7 @@ export default function ProjectEstimator() {
                 href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition duration-200 text-sm shadow-lg shadow-emerald-950/40"
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-3 rounded-xl transition duration-200 text-sm shadow-lg shadow-emerald-950/40 cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" /> Envoyer aussi sur WhatsApp
               </a>
@@ -265,7 +263,7 @@ export default function ProjectEstimator() {
                       className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex flex-col justify-between ${
                         isSelected
                           ? 'border-[#22d3ee] bg-[#22d3ee]/10 shadow-lg shadow-cyan-950/40 ring-1 ring-[#22d3ee]/50'
-                          : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/80'
+                          : 'border-slate-800 bg-slate-950/40 hover:border-slate-700 hover:bg-slate-950/80'
                       }`}
                     >
                       <div className="flex items-start gap-3 mb-3">
@@ -287,12 +285,21 @@ export default function ProjectEstimator() {
                 })}
               </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-between pt-4">
+                {/* زر Retour في الخطوة الأولى كيسد المودال بحال X */}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-5 rounded-xl transition duration-200 text-sm flex items-center gap-2 cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Retour
+                </button>
+
                 <button
                   type="button"
                   disabled={!selectedProject}
                   onClick={() => setStep(2)}
-                  className="bg-gradient-to-r from-[#22d3ee] to-[#00838F] hover:opacity-90 disabled:opacity-40 text-slate-950 font-bold py-2.5 px-6 rounded-xl transition duration-200 flex items-center gap-2 text-sm shadow-md"
+                  className="bg-gradient-to-r from-[#22d3ee] to-[#00838F] hover:opacity-90 disabled:opacity-40 text-slate-950 font-bold py-2.5 px-6 rounded-xl transition duration-200 flex items-center gap-2 text-sm shadow-md cursor-pointer"
                 >
                   Suivant <ArrowRight className="w-4 h-4" />
                 </button>
@@ -318,7 +325,7 @@ export default function ProjectEstimator() {
                       className={`p-3.5 rounded-xl border cursor-pointer flex items-center justify-between transition-all duration-200 ${
                         isChecked
                           ? 'border-[#22d3ee] bg-[#22d3ee]/10 text-white'
-                          : 'border-slate-800 bg-slate-900/40 text-slate-300 hover:border-slate-700'
+                          : 'border-slate-800 bg-slate-950/40 text-slate-300 hover:border-slate-700'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 pr-2">
@@ -346,14 +353,14 @@ export default function ProjectEstimator() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-5 rounded-xl transition duration-200 text-sm flex items-center gap-2"
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-5 rounded-xl transition duration-200 text-sm flex items-center gap-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" /> Retour
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(3)}
-                  className="bg-gradient-to-r from-[#22d3ee] to-[#00838F] hover:opacity-90 text-slate-950 font-bold py-2.5 px-6 rounded-xl transition duration-200 flex items-center gap-2 text-sm shadow-md"
+                  className="bg-gradient-to-r from-[#22d3ee] to-[#00838F] hover:opacity-90 text-slate-950 font-bold py-2.5 px-6 rounded-xl transition duration-200 flex items-center gap-2 text-sm shadow-md cursor-pointer"
                 >
                   Suivant <ArrowRight className="w-4 h-4" />
                 </button>
@@ -370,7 +377,6 @@ export default function ProjectEstimator() {
               </div>
 
               <div className="space-y-3.5">
-                {/* Nom & Prénom (OBLIGATOIRES) */}
                 <div className="grid md:grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-mono text-slate-300 mb-1">
@@ -400,7 +406,6 @@ export default function ProjectEstimator() {
                   </div>
                 </div>
 
-                {/* Téléphone & Email (OBLIGATOIRES) */}
                 <div className="grid md:grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-mono text-slate-300 mb-1">
@@ -430,7 +435,6 @@ export default function ProjectEstimator() {
                   </div>
                 </div>
 
-                {/* Champs OPTIONNELS */}
                 <div className="grid md:grid-cols-2 gap-3.5">
                   <div>
                     <label className="block text-xs font-mono text-slate-400 mb-1">
@@ -451,7 +455,7 @@ export default function ProjectEstimator() {
                     <select
                       value={budget}
                       onChange={(e) => setBudget(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-[#22d3ee] rounded-xl p-3 text-sm text-slate-100 focus:outline-none transition-colors"
+                      className="w-full bg-slate-950 border border-slate-800 focus:border-[#22d3ee] rounded-xl p-3 text-sm text-slate-100 focus:outline-none transition-colors cursor-pointer"
                     >
                       <option value="">Sélectionnez une tranche</option>
                       {budgetOptions.map((b, i) => (
@@ -479,14 +483,14 @@ export default function ProjectEstimator() {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-5 rounded-xl transition duration-200 text-sm flex items-center gap-2"
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-5 rounded-xl transition duration-200 text-sm flex items-center gap-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" /> Retour
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-gradient-to-r from-[#22d3ee] to-[#00838F] hover:opacity-90 disabled:opacity-50 text-slate-950 font-black py-2.5 px-6 rounded-xl transition duration-200 text-sm shadow-lg shadow-cyan-900/30"
+                  className="bg-gradient-to-r from-[#22d3ee] to-[#00838F] hover:opacity-90 disabled:opacity-50 text-slate-950 font-black py-2.5 px-6 rounded-xl transition duration-200 text-sm shadow-lg shadow-cyan-900/30 cursor-pointer"
                 >
                   {isSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
                 </button>
