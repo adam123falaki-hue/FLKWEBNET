@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ProjectEstimator from '@/app/components/ProjectEstimator';
+import ProjectEstimator from './ProjectEstimator';
 
 interface ModalProps {
   isOpen: boolean;
